@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Progress Report - GreenerField Onboarding</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div style="position: sticky; top: 0; background: white; padding: 16px; border-bottom: 1px solid #e5e7eb; z-index: 100; no-print">
+      <button onclick="window.print()" class="button button-primary button-small">🖨️ Print / Save as PDF</button>
+      <button onclick="window.close()" class="button button-secondary button-small" style="margin-left: 8px;">Close</button>
+    </div>
+
+    <main style="padding: 40px 20px;">
+      <div style="max-width: 800px; margin: 0 auto;">
+        <h1 id="report-title"></h1>
+
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+          <p style="margin: 0 0 8px 0;"><strong>Start Date:</strong> <span id="start-date"></span></p>
+          <p style="margin: 0 0 8px 0;"><strong>Report Generated:</strong> <span id="report-date"></span></p>
+          <p style="margin: 0;"><strong>Overall Completion:</strong> <span id="overall-percent">0%</span></p>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2>Completion by Owner</h2>
+          <div id="owner-breakdown"></div>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2>Incomplete Tasks</h2>
+          <div id="incomplete-tasks"></div>
+        </div>
+      </div>
+    </main>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/report.js"></script>
+  </body>
+</html>

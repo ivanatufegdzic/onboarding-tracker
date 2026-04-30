@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(pkill -9 -f \"node\")",
+      "Bash(npm start *)"
+    ]
+  }
+}

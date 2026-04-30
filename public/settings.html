@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings - GreenerField Onboarding</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div id="nav-root"></div>
+    <main>
+      <div class="breadcrumb">
+        <a href="/">Dashboard</a>
+        <span>&gt;</span>
+        <span>Settings</span>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('tasks')">Tasks</button>
+        <button class="tab-button" onclick="switchTab('owners')">Owners</button>
+        <button class="tab-button" onclick="switchTab('rules')">Deadline Rules</button>
+        <button class="tab-button" onclick="switchTab('reminders')">Reminders</button>
+      </div>
+
+      <!-- TASKS TAB -->
+      <div id="tab-tasks" class="tab-content active">
+        <div class="card mb-lg">
+          <h3>Add New Task</h3>
+          <form id="task-form" style="max-width: 400px;">
+            <div class="form-group">
+              <label for="task-title">Task Title</label>
+              <input type="text" id="task-title" required />
+            </div>
+            <div class="form-group">
+              <label for="task-phase">Phase</label>
+              <select id="task-phase" required>
+                <option value="pre_onboarding">Pre-Onboarding</option>
+                <option value="onboarding">Onboarding</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-owner">Owner</label>
+              <select id="task-owner" required></select>
+            </div>
+            <button type="submit" class="button-primary">Add Task</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Global Tasks</h3>
+          <p class="text-small text-muted mb-md">Drag to reorder tasks. They appear in this order for new hires.</p>
+          <div id="tasks-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+      </div>
+
+      <!-- OWNERS TAB -->
+      <div id="tab-owners" class="tab-content">
+        <div class="card mb-lg">
+          <h3>Add New Owner</h3>
+          <form id="owner-form" style="max-width: 400px;">
+            <div class="form-group">
+              <label for="owner-name">Name</label>
+              <input type="text" id="owner-name" required />
+            </div>
+            <div class="form-group">
+              <label for="owner-email">Email (optional)</label>
+              <input type="email" id="owner-email" />
+            </div>
+            <button type="submit" class="button-primary">Add Owner</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Owners</h3>
+          <table id="owners-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="owners-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DEADLINE RULES TAB -->
+      <div id="tab-rules" class="tab-content">
+        <div class="card">
+          <h3>Deadline Rules (days from start date)</h3>
+          <p class="text-small text-muted mb-md">
+            0 = by start date | Negative = before start date | Positive = after start date
+          </p>
+          <table id="rules-table">
+            <thead>
+              <tr>
+                <th>Phase</th>
+                <th>Owner</th>
+                <th>Days From Start</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="rules-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REMINDERS TAB -->
+      <div id="tab-reminders" class="tab-content">
+        <div class="card mb-lg">
+          <h3>Automatic Reminders</h3>
+          <p class="text-small text-muted mb-lg">
+            Email reminders are sent daily to owners with overdue tasks. Configure when they run.
+          </p>
+
+          <div class="form-group" style="max-width: 300px;">
+            <label for="reminder-enabled">Enable Automatic Reminders</label>
+            <input type="checkbox" id="reminder-enabled" checked style="width: 20px; height: 20px; cursor: pointer;" />
+          </div>
+
+          <div class="form-group" style="max-width: 300px;">
+            <label for="reminder-time">Reminder Time (24-hour format)</label>
+            <input type="time" id="reminder-time" value="09:00" />
+          </div>
+
+          <button onclick="saveReminderSettings()" class="button-primary mb-lg">Save Settings</button>
+        </div>
+
+        <div class="card mb-lg">
+          <h3>Manual Test</h3>
+          <p class="text-small text-muted mb-md">
+            Manually trigger a reminder check right now. Useful for testing.
+          </p>
+          <button onclick="triggerReminder()" class="button-secondary">Send Reminders Now</button>
+          <p id="reminder-result" class="text-small mt-md" style="display: none;"></p>
+        </div>
+
+        <div class="card">
+          <h3>Last Run</h3>
+          <p id="last-run-info" class="text-small text-muted">Never run</p>
+        </div>
+      </div>
+    </main>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/settings.js"></script>
+  </body>
+</html>
