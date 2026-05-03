@@ -217,7 +217,7 @@ export async function sendOverdueReminders(): Promise<{ sent: number; recipients
         console.log(`  Sending email to ${owner.email}...`);
         await sgMail.send({
           to: owner.email,
-          from: 'noreply@greenerfield.com',
+          from: 'ivana_tufegdzic@greenerfield.com',
           subject,
           html,
         });
