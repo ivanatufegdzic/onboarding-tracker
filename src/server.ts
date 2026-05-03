@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import * as net from 'net';
 import express, { Express, Request, Response } from 'express';
 import path from 'path';
 import { loadData, saveData, seedIfEmpty } from './services/dataStore';
@@ -9,6 +10,28 @@ import hiresRouter from './routes/hires';
 import settingsRouter from './routes/settings';
 import remindersRouter from './routes/reminders';
 import statsRouter from './routes/stats';
+
+// --- Gmail SMTP connectivity diagnostic ---
+console.log('🔍 Testing Gmail SMTP connectivity...');
+const _smtpSocket = new net.Socket();
+_smtpSocket.setTimeout(10000);
+
+_smtpSocket.on('connect', () => {
+  console.log('✓ SUCCESS: Connected to smtp.gmail.com:465');
+  _smtpSocket.destroy();
+});
+
+_smtpSocket.on('timeout', () => {
+  console.log('✗ TIMEOUT: Cannot reach smtp.gmail.com:465 (connection timed out)');
+  _smtpSocket.destroy();
+});
+
+_smtpSocket.on('error', (err: Error) => {
+  console.log('✗ ERROR: Cannot reach smtp.gmail.com:465 -', err.message);
+});
+
+_smtpSocket.connect(465, 'smtp.gmail.com');
+// --- End diagnostic ---
 
 const app: Express = express();
 const PORT = process.env.PORT || 3000;
