@@ -7,6 +7,8 @@ import { Cohort, IndividualHire, GlobalTask, Owner, DeadlineRule } from '../type
 const createTransporter = () => {
   return nodemailer.createTransport({
     service: 'gmail',
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_APP_PASSWORD,
