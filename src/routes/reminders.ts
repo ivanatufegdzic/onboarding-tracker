@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { sendOverdueReminders } from '../services/emailService';
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
 const router = Router();
 
@@ -15,39 +15,28 @@ router.post('/send-now', async (req: Request, res: Response) => {
   }
 });
 
-// POST test SendGrid transporter connection (for debugging)
+// POST test SendGrid API connection (for debugging)
 router.post('/test-gmail', async (req: Request, res: Response) => {
   try {
-    console.log(`\n🔬 Testing SendGrid connection...`);
+    console.log(`\n🔬 Testing SendGrid API...`);
     console.log(`   API Key: ${process.env.SENDGRID_API_KEY ? '✓ set' : '✗ not set'}`);
 
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY,
-      },
-    });
+    if (!process.env.SENDGRID_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        error: 'SENDGRID_API_KEY not set',
+      });
+    }
 
-    console.log(`Verifying transporter...`);
-    await transporter.verify();
-    console.log(`✓ SendGrid transporter verified`);
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    console.log(`✓ SendGrid API configured`);
 
-    res.json({ success: true, message: 'SendGrid connection verified' });
+    res.json({ success: true, message: 'SendGrid API verified' });
   } catch (error: any) {
-    console.error(`✗ SendGrid test failed:`, {
-      code: error.code,
-      message: error.message,
-      response: error.response,
-      command: error.command,
-    });
+    console.error(`✗ SendGrid test failed:`, error.message);
     res.status(500).json({
       success: false,
       error: error.message,
-      code: error.code,
-      details: error.response,
     });
   }
 });

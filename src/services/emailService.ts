@@ -1,36 +1,21 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import { getEmailSubject, renderTaskEmailBody, OverdueTask } from '../emailTemplate';
 import { calculateDueDate, isOverdue, getDeadlineRule, loadData } from './dataStore';
 import { Cohort, IndividualHire, GlobalTask, Owner, DeadlineRule } from '../types';
 
-// Create transporter for SendGrid
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: 'smtp.sendgrid.net',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'apikey',
-      pass: process.env.SENDGRID_API_KEY,
-    },
-  });
-};
-
-// Verify transporter connection
-async function verifyTransporter(transporter: any): Promise<boolean> {
+// Verify SendGrid API connection
+async function verifySendGridConnection(): Promise<boolean> {
   try {
-    console.log(`🔐 Verifying SendGrid transporter...`);
-    console.log(`   API Key: ${process.env.SENDGRID_API_KEY ? '✓ set' : '✗ not set'}`);
-    await transporter.verify();
-    console.log(`✓ SendGrid transporter verified successfully`);
+    if (!process.env.SENDGRID_API_KEY) {
+      console.error(`✗ SENDGRID_API_KEY not set`);
+      return false;
+    }
+    console.log(`🔐 Verifying SendGrid API...`);
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    console.log(`✓ SendGrid API configured successfully`);
     return true;
   } catch (error: any) {
-    console.error(`✗ SendGrid transporter verification failed:`, {
-      code: error.code,
-      message: error.message,
-      response: error.response,
-      command: error.command,
-    });
+    console.error(`✗ SendGrid verification failed:`, error.message);
     return false;
   }
 }
@@ -187,19 +172,18 @@ export async function sendOverdueReminders(): Promise<{ sent: number; recipients
       });
     });
 
-    // Send emails
-    const transporter = createTransporter();
-    const sentRecipients: string[] = [];
-    let sentCount = 0;
-
-    // Verify transporter before sending any emails
-    const isVerified = await verifyTransporter(transporter);
+    // Verify SendGrid connection
+    const isVerified = await verifySendGridConnection();
     if (!isVerified) {
-      console.error(`Cannot send reminders: SendGrid authentication failed`);
-      console.error(`Environment check:`);
-      console.error(`  SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? '✓ set' : '✗ not set'}`);
+      console.error(`Cannot send reminders: SendGrid API key not set`);
       return { sent: 0, recipients: [] };
     }
+
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
+
+    // Send emails
+    const sentRecipients: string[] = [];
+    let sentCount = 0;
 
     for (const [ownerId, tasks] of remindersByOwner.entries()) {
       const owner = owners.find((o) => o.id === ownerId);
@@ -231,9 +215,9 @@ export async function sendOverdueReminders(): Promise<{ sent: number; recipients
         const html = renderTaskEmailBody(owner.name, uniqueTasks);
 
         console.log(`  Sending email to ${owner.email}...`);
-        await transporter.sendMail({
-          from: 'noreply@greenerfield.com',
+        await sgMail.send({
           to: owner.email,
+          from: 'noreply@greenerfield.com',
           subject,
           html,
         });
@@ -242,12 +226,7 @@ export async function sendOverdueReminders(): Promise<{ sent: number; recipients
         sentCount++;
         console.log(`✓ Sent reminder to ${owner.name} (${owner.email}) — ${uniqueTasks.length} tasks`);
       } catch (error: any) {
-        console.error(`✗ Failed to send email to ${owner.email}:`, {
-          code: error.code,
-          message: error.message,
-          response: error.response,
-          command: error.command,
-        });
+        console.error(`✗ Failed to send email to ${owner.email}:`, error.message);
       }
     }
 
