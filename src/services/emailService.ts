@@ -3,15 +3,15 @@ import { getEmailSubject, renderTaskEmailBody, OverdueTask } from '../emailTempl
 import { calculateDueDate, isOverdue, getDeadlineRule, loadData } from './dataStore';
 import { Cohort, IndividualHire, GlobalTask, Owner, DeadlineRule } from '../types';
 
-// Create transporter for Gmail
+// Create transporter for SendGrid
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: 'gmail',
-    port: 465,
-    secure: true,
+    host: 'smtp.sendgrid.net',
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
+      user: 'apikey',
+      pass: process.env.SENDGRID_API_KEY,
     },
   });
 };
@@ -19,13 +19,13 @@ const createTransporter = () => {
 // Verify transporter connection
 async function verifyTransporter(transporter: any): Promise<boolean> {
   try {
-    console.log(`🔐 Verifying Gmail transporter...`);
-    console.log(`   Email: ${process.env.GMAIL_USER}`);
+    console.log(`🔐 Verifying SendGrid transporter...`);
+    console.log(`   API Key: ${process.env.SENDGRID_API_KEY ? '✓ set' : '✗ not set'}`);
     await transporter.verify();
-    console.log(`✓ Gmail transporter verified successfully`);
+    console.log(`✓ SendGrid transporter verified successfully`);
     return true;
   } catch (error: any) {
-    console.error(`✗ Gmail transporter verification failed:`, {
+    console.error(`✗ SendGrid transporter verification failed:`, {
       code: error.code,
       message: error.message,
       response: error.response,
@@ -195,10 +195,9 @@ export async function sendOverdueReminders(): Promise<{ sent: number; recipients
     // Verify transporter before sending any emails
     const isVerified = await verifyTransporter(transporter);
     if (!isVerified) {
-      console.error(`Cannot send reminders: Gmail authentication failed`);
+      console.error(`Cannot send reminders: SendGrid authentication failed`);
       console.error(`Environment check:`);
-      console.error(`  GMAIL_USER: ${process.env.GMAIL_USER ? '✓ set' : '✗ not set'}`);
-      console.error(`  GMAIL_APP_PASSWORD: ${process.env.GMAIL_APP_PASSWORD ? '✓ set' : '✗ not set'}`);
+      console.error(`  SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? '✓ set' : '✗ not set'}`);
       return { sent: 0, recipients: [] };
     }
 
@@ -233,7 +232,7 @@ export async function sendOverdueReminders(): Promise<{ sent: number; recipients
 
         console.log(`  Sending email to ${owner.email}...`);
         await transporter.sendMail({
-          from: process.env.GMAIL_USER,
+          from: 'noreply@greenerfield.com',
           to: owner.email,
           subject,
           html,

@@ -15,30 +15,29 @@ router.post('/send-now', async (req: Request, res: Response) => {
   }
 });
 
-// POST test Gmail transporter connection (for debugging)
+// POST test SendGrid transporter connection (for debugging)
 router.post('/test-gmail', async (req: Request, res: Response) => {
   try {
-    console.log(`\n🔬 Testing Gmail connection...`);
-    console.log(`   Email: ${process.env.GMAIL_USER}`);
-    console.log(`   Password length: ${process.env.GMAIL_APP_PASSWORD?.length || 0}`);
+    console.log(`\n🔬 Testing SendGrid connection...`);
+    console.log(`   API Key: ${process.env.SENDGRID_API_KEY ? '✓ set' : '✗ not set'}`);
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      port: 465,
-      secure: true,
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY,
       },
     });
 
     console.log(`Verifying transporter...`);
     await transporter.verify();
-    console.log(`✓ Gmail transporter verified`);
+    console.log(`✓ SendGrid transporter verified`);
 
-    res.json({ success: true, message: 'Gmail connection verified' });
+    res.json({ success: true, message: 'SendGrid connection verified' });
   } catch (error: any) {
-    console.error(`✗ Gmail test failed:`, {
+    console.error(`✗ SendGrid test failed:`, {
       code: error.code,
       message: error.message,
       response: error.response,
